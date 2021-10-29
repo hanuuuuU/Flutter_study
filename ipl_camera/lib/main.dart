@@ -81,169 +81,165 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIOverlays([]);
     return Scaffold(
-      // You must wait until the controller is initialized before displaying the
-      // camera preview. Use a FutureBuilder to display a loading spinner until the
-      // controller has finished initializing.
       backgroundColor: Colors.black,
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          FutureBuilder<void>(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                // If the Future is complete, display the preview.
-                return CameraPreview(_controller);
-              } else {
-                // Otherwise, display a loading indicator.
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-          Stack(alignment: Alignment.center, children: [
-            Container(
-              height: 90,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
-                  Container(
-                    width: left1,
-                    color: Colors.transparent,
-                  ),
-                  Container(
-                    width: left2,
-                    color: Colors.transparent,
-                  ),
-                  Container(
-                    width: 80,
-                    color: Colors.transparent,
-                    child: RawMaterialButton(
-                        onPressed: () {
-                          setState(() {
-                            left1 = 78;
-                            left2 = 78;
-                          });
-                        },
-                        elevation: 1.0,
-                        fillColor: Colors.transparent,
-                        child: Icon(
-                          Icons.circle,
-                          size: 70,
-                          color: Colors.pink[100],
-                        ),
-                        shape: CircleBorder()),
-                  ),
-                  Container(
-                    width: 80,
-                    color: Colors.transparent,
-                    child: RawMaterialButton(
-                        onPressed: () {
-                          setState(() {
-                            left1 = 78;
-                            left2 = 0;
-                          });
-                        },
-                        elevation: 1.0,
-                        fillColor: Colors.transparent,
-                        child: Icon(
-                          Icons.circle,
-                          size: 70,
-                          color: Colors.white,
-                        ),
-                        shape: CircleBorder()),
-                  ),
-                  Container(
-                    width: 80,
-                    color: Colors.black,
-                    child: RawMaterialButton(
-                        onPressed: () {
-                          setState(() {
-                            left1 = 0;
-                            left2 = 0;
-                          });
-                        },
-                        elevation: 1.0,
-                        fillColor: Colors.transparent,
-                        child: Icon(
-                          Icons.circle,
-                          size: 70,
-                          color: Colors.red,
-                        ),
-                        shape: CircleBorder()),
-                  ),
-                  Container(
-                    width: right1,
-                    color: Colors.black,
-                  ),
-                ],
+          Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              FutureBuilder<void>(
+                future: _initializeControllerFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    //카메라 화면 보여주기
+                    return CameraPreview(_controller);
+                  } else {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                },
               ),
-            ),
-            RawMaterialButton(
-              onPressed: () async {
-                if (left1 == 78 && left2 == 78) {
-                  print('Live');
-                } else if (left1 == 78 && left2 == 0) {
-                  try {
-                    // Ensure that the camera is initialized.
+              Container(
+                height: 90,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: [
+                    Container(
+                      width: left1,
+                      color: Colors.transparent,
+                    ),
+                    Container(
+                      width: left2,
+                      color: Colors.transparent,
+                    ),
+                    Container(
+                      width: 80,
+                      color: Colors.transparent,
+                      child: RawMaterialButton(
+                          onPressed: () {
+                            setState(() {
+                              left1 = 78;
+                              left2 = 78;
+                            });
+                          },
+                          elevation: 0,
+                          fillColor: Colors.transparent,
+                          child: Icon(
+                            Icons.circle,
+                            size: 70,
+                            color: Colors.pink[100],
+                          ),
+                          shape: CircleBorder()),
+                    ),
+                    Container(
+                      width: 80,
+                      color: Colors.transparent,
+                      child: RawMaterialButton(
+                          onPressed: () {
+                            setState(() {
+                              left1 = 78;
+                              left2 = 0;
+                            });
+                          },
+                          elevation: 0,
+                          fillColor: Colors.transparent,
+                          child: Icon(
+                            Icons.circle,
+                            size: 70,
+                            color: Colors.white,
+                          ),
+                          shape: CircleBorder()),
+                    ),
+                    Container(
+                      width: 80,
+                      color: Colors.transparent,
+                      child: RawMaterialButton(
+                          onPressed: () {
+                            setState(() {
+                              left1 = 0;
+                              left2 = 0;
+                            });
+                          },
+                          elevation: 0,
+                          fillColor: Colors.transparent,
+                          child: Icon(
+                            Icons.circle,
+                            size: 70,
+                            color: Colors.red,
+                          ),
+                          shape: CircleBorder()),
+                    ),
+                    Container(
+                      width: right1,
+                      color: Colors.transparent,
+                    ),
+                  ],
+                ),
+              ),
+              RawMaterialButton(
+                onPressed: () async {
+                  if (left1 == 78 && left2 == 78) {
+                    print('Live');
+                  } else if (left1 == 78 && left2 == 0) {
+                    try {
+                      // Ensure that the camera is initialized.
+                      await _initializeControllerFuture;
+
+                      // Attempt to take a picture and get the file `image`
+                      // where it was saved.
+                      final image = await _controller.takePicture();
+
+                      // If the picture was taken, display it on a new screen.
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ViewImage(
+                            // Pass the automatically generated path to
+                            // the DisplayPictureScreen widget.
+                            path: image.path,
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      // If an error occurs, log the error to the console.
+                      print(e);
+                    }
+                  } else if (left1 == 0 && left2 == 0) {
                     await _initializeControllerFuture;
 
-                    // Attempt to take a picture and get the file `image`
-                    // where it was saved.
-                    final image = await _controller.takePicture();
+                    if (!onRec) {
+                      print('Recording Video');
 
-                    // If the picture was taken, display it on a new screen.
-                    await Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ViewImage(
-                          // Pass the automatically generated path to
-                          // the DisplayPictureScreen widget.
-                          path: image.path,
-                        ),
-                      ),
-                    );
-                  } catch (e) {
-                    // If an error occurs, log the error to the console.
-                    print(e);
+                      await _controller.startVideoRecording();
+                      setState(() {
+                        recording = Icons.radio_button_on_outlined;
+                        onRec = true;
+                      });
+                    } else {
+                      print('Stop recording');
+                      XFile videopath = await _controller.stopVideoRecording();
+                      setState(() {
+                        recording = Icons.circle_outlined;
+                        onRec = false;
+                      });
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  ViewVideo(path: videopath.path)));
+                    }
                   }
-                } else if (left1 == 0 && left2 == 0) {
-                  await _initializeControllerFuture;
-
-                  if (!onRec) {
-                    print('Recording Video');
-
-                    await _controller.startVideoRecording();
-                    setState(() {
-                      recording = Icons.radio_button_on_outlined;
-                      onRec = true;
-                    });
-                  } else {
-                    print('Stop recording');
-                    XFile videopath = await _controller.stopVideoRecording();
-                    setState(() {
-                      recording = Icons.circle_outlined;
-                      onRec = false;
-                    });
-                    print("-------------------");
-                    print(videopath.path);
-                    print("-------------------");
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                ViewVideo(path: videopath.path)));
-                  }
-                }
-              },
-              elevation: 2.0,
-              fillColor: Colors.transparent,
-              child: Icon(
-                recording,
-                size: 80,
-                color: Colors.white,
-              ),
-              shape: CircleBorder(),
-            ),
-          ])
+                },
+                elevation: 2.0,
+                fillColor: Colors.transparent,
+                child: Icon(
+                  recording,
+                  size: 80,
+                  color: Colors.white,
+                ),
+                shape: CircleBorder(),
+              )
+            ],
+          )
         ],
       ),
     );
