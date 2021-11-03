@@ -37,6 +37,10 @@ dependencies:
   image_picker: ^0.8.4+3
   image_gallery_saver: ^1.7.1
   fluttertoast: ^8.0.8
+  scroll_to_index: ^2.1.0
+  dio: ^4.0.1
+  http: ^0.13.4
+  convert: ^3.0.1
 
 dev_dependencies:
   flutter_test:

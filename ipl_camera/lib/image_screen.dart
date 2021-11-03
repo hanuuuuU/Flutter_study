@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class ViewImage extends StatefulWidget {
   const ViewImage({Key? key, required this.path}) : super(key: key);
@@ -13,9 +17,38 @@ class ViewImage extends StatefulWidget {
 }
 
 class _ViewImage extends State<ViewImage> {
+  void uploading(String path) async {
+    var headers = {
+      'Content-Type': 'multipart/form-data',
+      'Authorization':
+          'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1OTUyOTY1LCJpYXQiOjE2MzU2OTM3NjUsImp0aSI6IjgxNzFlZTJkZTYzYTQwNGI4ZjA5Nzg1ZDUzNDNhYzdjIiwidXNlcl9pZCI6MSwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20ifQ.6Svn0PCmTphILLwr8JF7eg5QxnRMReNaLK2cfVXoCxQ'
+    };
+    var request = http.MultipartRequest(
+        'POST', Uri.parse('https://ipl-main.herokuapp.com/data/images/'));
+    request.fields.addAll({
+      'useremail': 'admin@admin.com',
+      'username': 'admin',
+      'desc': 'test upload2'
+    });
+    request.files.add(await http.MultipartFile.fromPath('image', path));
+    print('============================');
+    print(path);
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    print(response.statusCode);
+
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
+    File editImage = File(widget.path);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -65,6 +98,7 @@ class _ViewImage extends State<ViewImage> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: FloatingActionButton(
+                    heroTag: 'back',
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -84,6 +118,7 @@ class _ViewImage extends State<ViewImage> {
                     children: [
                       //수정
                       FloatingActionButton(
+                        heroTag: 'modify',
                         onPressed: () {},
                         elevation: 0,
                         child: Icon(
@@ -94,13 +129,21 @@ class _ViewImage extends State<ViewImage> {
                       ),
                       //저장
                       FloatingActionButton(
+                        heroTag: 'download',
                         onPressed: () async {
-                          await ImageGallerySaver.saveFile(widget.path);
-                          Fluttertoast.showToast(
-                              msg: '저장되었습니다.',
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              textColor: Colors.white);
+                          print('dd');
+
+                          final docPath = await getExternalStorageDirectory();
+                          print(docPath);
+                          final filename = basename(editImage.path);
+                          print(filename);
+                          try {
+                            final localImage = await editImage
+                                .copy('${docPath!.path}/$filename');
+                            print(localImage);
+                          } catch (e) {
+                            print(e);
+                          }
                         },
                         elevation: 0,
                         child: Icon(
@@ -111,7 +154,10 @@ class _ViewImage extends State<ViewImage> {
                       ),
                       //업로드
                       FloatingActionButton(
-                        onPressed: () {},
+                        heroTag: 'upload',
+                        onPressed: () {
+                          uploading(editImage.path);
+                        },
                         elevation: 0,
                         child: Icon(
                           Icons.add_to_photos_outlined,
