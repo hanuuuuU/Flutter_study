@@ -224,8 +224,13 @@ class _ViewImage extends State<ViewImage> {
                           final filename = basename(editImage!.path);
                           print(filename);
                           try {
+<<<<<<< HEAD
                             final localImage = await editImage!
                                 .copy('${docPath!.path}/$filename');
+=======
+                            final localImage =
+                                await editImage.copy('${'/Phone/h/'}$filename');
+>>>>>>> f6ce91648c69749984ded3c8d725b141dd313823
                             print(localImage);
                           } catch (e) {
                             print(e);
