@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ipl_camera/image_screen.dart';
+import 'package:fab_circular_menu/fab_circular_menu.dart';
 
 Future<void> main() async {
   // Ensure that plugin services are initialized so that `availableCameras()`
@@ -48,6 +49,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
   bool onRec = false;
   var recording = Icons.circle_outlined;
   final itemKey = GlobalKey();
+  int now = 0;
 
   @override
   void initState() {
@@ -81,129 +83,118 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Stack(
-            alignment: Alignment.bottomCenter,
-            children: [
-              FutureBuilder<void>(
-                future: _initializeControllerFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    //카메라 화면 보여주기
-                    return CameraPreview(_controller);
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
+      body: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+        Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            FutureBuilder<void>(
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  //카메라 화면 보여주기
+                  return CameraPreview(_controller);
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+            Positioned(
+                bottom: 26,
+                child: Container(
+                  height: 80,
+                  child: SingleChildScrollView(
+                    child: Row(
+                      children: [
+                        RawMaterialButton(
+                          key: itemKey,
+                          elevation: 0,
+                          onPressed: () => scrollToItem(),
+                          child: Icon(
+                            Icons.circle,
+                            size: 70,
+                            color: Colors.transparent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+            Positioned(
+              bottom: 30,
+              child: RawMaterialButton(
+                onPressed: () async {
+                  if (now == 0) {
+                    try {
+                      // 카메라 초기화
+                      await _initializeControllerFuture;
+
+                      // 사진을 촬영하여 image에 저장
+                      final image = await _controller.takePicture();
+
+                      // 사진을 찍으면 image_screen 페이지 실행
+                      // 메모리에 올라간 현재 촬영한 사진의 경로를 보냄
+                      await Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => ViewImage(
+                            path: image.path,
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      print(e);
+                    }
                   }
                 },
+                elevation: 2.0,
+                fillColor: Colors.transparent,
+                child: Icon(
+                  recording,
+                  size: 80,
+                  color: Colors.white,
+                ),
+                shape: CircleBorder(),
               ),
-              Positioned(
-                  bottom: 26,
-                  child: Container(
-                    height: 80,
-                    child: SingleChildScrollView(
-                      child: Row(
-                        children: [
-                          RawMaterialButton(
-                            elevation: 0,
-                            onPressed: () {},
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                          RawMaterialButton(
-                            elevation: 0,
-                            onPressed: () {},
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                          RawMaterialButton(
-                            onPressed: () {},
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                              color: Colors.pink[200],
-                            ),
-                          ),
-                          RawMaterialButton(
-                            onPressed: () {},
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                            ),
-                          ),
-                          RawMaterialButton(
-                            onPressed: () {},
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                              color: Colors.red,
-                            ),
-                          ),
-                          RawMaterialButton(
-                            key: itemKey,
-                            elevation: 0,
-                            onPressed: () => scrollToItem(),
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                          RawMaterialButton(
-                            elevation: 0,
-                            onPressed: () {},
-                            child: Icon(
-                              Icons.circle,
-                              size: 70,
-                              color: Colors.transparent,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )),
-              Positioned(
-                  bottom: 30,
-                  child: RawMaterialButton(
-                    onPressed: () async {
-                      try {
-                        // 카메라 초기화
-                        await _initializeControllerFuture;
-
-                        // 사진을 촬영하여 image에 저장
-                        final image = await _controller.takePicture();
-
-                        // 사진을 찍으면 image_screen 페이지 실행
-                        // 메모리에 올라간 현재 촬영한 사진의 경로를 보냄
-                        await Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => ViewImage(
-                              path: image.path,
-                            ),
-                          ),
-                        );
-                      } catch (e) {
-                        print(e);
-                      }
-                    },
-                    elevation: 2.0,
-                    fillColor: Colors.transparent,
-                    child: Icon(
-                      recording,
-                      size: 80,
-                      color: Colors.white,
-                    ),
-                    shape: CircleBorder(),
-                  ))
-            ],
-          )
+            ),
+          ],
+        ),
+      ]),
+      floatingActionButton: FabCircularMenu(
+        ringColor: Color(0xfffcaa06),
+        ringDiameter: 200,
+        ringWidth: 45,
+        fabSize: 50,
+        fabColor: Color(0xfffcaa06),
+        children: [
+          IconButton(
+            onPressed: () {
+              print("카메라");
+              now = 0;
+            },
+            icon: Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              print("비디오");
+              now = 1;
+            },
+            icon: Icon(
+              Icons.video_camera_back,
+              color: Colors.white,
+            ),
+          ),
+          IconButton(
+            onPressed: () {
+              print("앨범");
+              now = 2;
+            },
+            icon: Icon(
+              Icons.photo_album,
+              color: Colors.white,
+            ),
+          ),
         ],
       ),
     );
