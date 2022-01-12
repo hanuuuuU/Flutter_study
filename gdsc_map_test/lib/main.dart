@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() => runApp(MyApp());
 
@@ -11,7 +12,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Google Maps Demo',
+      title: 'MAP TEST',
       home: MapSample(),
     );
   }
@@ -25,20 +26,17 @@ class MapSample extends StatefulWidget {
 class MapSampleState extends State<MapSample> {
   Completer<GoogleMapController> _controller = Completer();
 
-  double? lng, lat;
   List<Marker> _markers = [];
+  List<Polyline> _line = [];
   bool tf = true;
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
+  static final CameraPosition _start = CameraPosition(
     target: LatLng(37.5283169, 126.9294254),
-    zoom: 11.4746,
+    zoom: 14,
   );
 
-  static final CameraPosition _kLake = CameraPosition(
-      //bearing: 192.8334901395799,
-      target: LatLng(36.7697899, 126.9317528),
-      //tilt: 59.440717697143555,
-      zoom: 14);
+  static final CameraPosition _univ =
+      CameraPosition(target: LatLng(36.7697899, 126.9317528), zoom: 14);
 
   @override
   void initState() {
@@ -51,13 +49,14 @@ class MapSampleState extends State<MapSample> {
     return new Scaffold(
       body: GoogleMap(
         mapType: MapType.normal,
-        initialCameraPosition: _kGooglePlex,
+        initialCameraPosition: _start,
         onMapCreated: (GoogleMapController controller) {
           _controller.complete(controller);
         },
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
         markers: _markers.toSet(),
+        polylines: _line.toSet(),
         onTap: (pos) {
           addMark(pos);
         },
@@ -67,16 +66,31 @@ class MapSampleState extends State<MapSample> {
         child: Row(
           children: [
             FloatingActionButton.extended(
-              onPressed: _goToTheLake,
-              label: Text('Academy'),
+              onPressed: _goToUniv,
+              label: Text('University'),
               icon: Icon(Icons.school),
             ),
             SizedBox(
               width: 10,
             ),
             FloatingActionButton.extended(
-                onPressed: () {},
-                label: Text('Mark'),
+                onPressed: () async {
+                  if (_markers.length == 2) {
+                    var dis = await Geolocator.distanceBetween(
+                        _markers[0].position.latitude,
+                        _markers[0].position.longitude,
+                        _markers[1].position.latitude,
+                        _markers[1].position.longitude);
+                    Fluttertoast.showToast(
+                        msg: "${dis.toInt()}M",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        backgroundColor: Colors.grey,
+                        textColor: Colors.white,
+                        fontSize: 16.0);
+                  }
+                },
+                label: Text('Distance'),
                 icon: Icon(
                   Icons.fmd_good_outlined,
                 ))
@@ -108,25 +122,12 @@ class MapSampleState extends State<MapSample> {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-    _getPosition();
-  }
-
-  _getPosition() async {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best);
-    try {
-      setState(() {
-        lng = position.longitude;
-        lat = position.latitude;
-      });
-    } catch (e) {
-      print(e);
-    }
   }
 
   addMark(pos) {
     setState(() {
       if (tf) {
+        _line.clear();
         _markers.clear();
         _markers.add(Marker(position: pos, markerId: MarkerId('1')));
         tf = !tf;
@@ -136,13 +137,21 @@ class MapSampleState extends State<MapSample> {
             markerId: MarkerId('2'),
             icon: BitmapDescriptor.defaultMarkerWithHue(
                 BitmapDescriptor.hueBlue)));
+        addLine(_markers[0].position, _markers[1].position);
         tf = !tf;
       }
     });
   }
 
-  Future<void> _goToTheLake() async {
+  addLine(LatLng mark1, LatLng mark2) {
+    setState(() {
+      _line.add(Polyline(
+          polylineId: PolylineId('poly'), points: [mark1, mark2], width: 5));
+    });
+  }
+
+  Future<void> _goToUniv() async {
     final GoogleMapController controller = await _controller.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(_kLake));
+    controller.animateCamera(CameraUpdate.newCameraPosition(_univ));
   }
 }

@@ -1,11 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.gdsc_map_test">
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
    <application
         android:label="gdsc_map_test"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="AIzaSyBB64LUTTvh45SHOPLLhBw6nBrWDw-LiQo"/>
+               android:value="AIzaSyBUoB25hSYFt3tbs3NKwpMugd3K5YiwSls"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
