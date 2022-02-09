@@ -15,6 +15,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: Stack(
         children: [
+          //배경
           Positioned(
               top: 0,
               left: 0,
@@ -50,6 +51,7 @@ class _HomeState extends State<Home> {
                   )),
                 ),
               )),
+          //로그인, 회원가입 컨테이너
           Positioned(
               top: 180,
               child: Container(
@@ -131,11 +133,11 @@ class _HomeState extends State<Home> {
                           child: Form(
                             child: Column(
                               children: [
-                                InputInfo(hint: 'User name',icon: Icons.account_circle),
+                                InputInfo(key: ValueKey(1),hint: 'User name',icon: Icons.account_circle),
                                 SizedBox(height: 10),
-                                InputInfo(hint: 'User email',icon: Icons.email),
+                                InputInfo(key: ValueKey(2),hint: 'User email',icon: Icons.email),
                                 SizedBox(height: 10),
-                                InputInfo(hint: 'password',icon: Icons.password)
+                                InputInfo(key: ValueKey(3),hint: 'password',icon: Icons.password)
                               ],
                             ),
                           ),
@@ -146,9 +148,9 @@ class _HomeState extends State<Home> {
                             child: Form(
                               child: Column(
                                 children: [
-                                  InputInfo(hint: 'User email',icon: Icons.account_circle,),
+                                  InputInfo(key: ValueKey(4),hint: 'User email',icon: Icons.account_circle,),
                                   SizedBox(height: 10),
-                                  InputInfo(hint: 'password',icon: Icons.password)
+                                  InputInfo(key: ValueKey(5),hint: 'password',icon: Icons.password)
                                 ],
                               ),
                             ))
@@ -156,6 +158,7 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               )),
+          //로그인 버튼
           Positioned(
               top: isSignUpScreen ? 430 : 390,
               right: 0,
@@ -188,6 +191,7 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               )),
+          //구글 로그인 버튼
           Positioned(
               top: MediaQuery.of(context).size.height - 125,
               right: 0,
