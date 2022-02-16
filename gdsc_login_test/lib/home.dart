@@ -12,12 +12,14 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
+    //뒤로가기 방지를 위한 위젯
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
           actions: [
+            //로그아웃 버튼
             IconButton(
                 onPressed: () async {
                   FirebaseAuth.instance.signOut();
@@ -29,7 +31,7 @@ class _HomeState extends State<Home> {
                 icon: Icon(Icons.exit_to_app))
           ],
         ),
-        body: Center(
+        body: Center( //현재 로그인 중인 유저의 uid를 출력한다.
           child: Text('${FirebaseAuth.instance.currentUser!.uid}'),
         ),
       ),
