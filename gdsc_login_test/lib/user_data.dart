@@ -8,11 +8,8 @@ class UserData {
   Map<String, dynamic> toMap(){
     return{
       'email' : email,
-      'name':name,
-      'phone':phone,
-
+      'name' : name,
+      'phone' : phone,
     };
   }
-
-
 }

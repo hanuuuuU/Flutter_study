@@ -62,6 +62,7 @@ class _LoginState extends State<Login> {
                     Container(
                       margin: EdgeInsets.fromLTRB(25, 0, 25, 0),
                       child: TextFormField(
+                        autofocus: true,
                         controller: pwController,
                         obscureText: true,  //비밀번호가 ....으로 표시되도록 한다
                         validator: (value) {

@@ -159,6 +159,9 @@ class _SignUpState extends State<SignUp> {
   void registerDetails() async{
     //firestore database에 현재 등록 유저의 정보 올리기
     //<Users 컬렉션 -> 현재 유저의 uid 도큐먼트>에 유저 데이터 추가
+    //컬렉션에 도큐먼트를 추가할 때는 add를 사용하였지만
+    //도큐먼트에 데이터를 추가할 때는 set을 사용한다.
+    //set 안에는 Map형식의 값을 넣어줘야 한다.
     UserData userData = UserData();
     userData.email = emailController.text;
     userData.name = nameController.text;
@@ -166,7 +169,7 @@ class _SignUpState extends State<SignUp> {
 
     final firebaseFirestore = FirebaseFirestore.instance;
     await firebaseFirestore
-        .collection("users")
+        .collection("Users")
         .doc(_auth.currentUser!.uid)
         .set(userData
             .toMap());
