@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'login.dart';
 
 class Home extends StatefulWidget {
@@ -10,6 +11,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _info = FirebaseFirestore.instance.collection('Users').doc(FirebaseAuth.instance.currentUser!.uid);
+
   @override
   Widget build(BuildContext context) {
     //뒤로가기 방지를 위한 위젯
@@ -31,10 +34,26 @@ class _HomeState extends State<Home> {
                 icon: Icon(Icons.exit_to_app))
           ],
         ),
-        body: Center( //현재 로그인 중인 유저의 uid를 출력한다.
-          child: Text('${FirebaseAuth.instance.currentUser!.uid}'),
-        ),
-      ),
+        body: StreamBuilder<DocumentSnapshot>(
+          stream: _info.snapshots(),
+          builder: (context,snapshot){
+            if(!snapshot.hasData){
+              return CircularProgressIndicator();
+            }
+            var data = snapshot.data;
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('이름: ${data!['name']}'),
+                  Text('이메일: ${data['email']}'),
+                  Text('전화번호: ${data['phone']}'),
+                ],
+              ),
+            );
+          },
+        )
+              ),
     );
   }
 }
